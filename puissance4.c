@@ -1,31 +1,26 @@
-// gcc -Wall -o puissance4 puissance4.c && ./puissance4
-
-
-
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#define NB_ROWS 6
+#define NB_NB_COLUMNS 7
 
 int min_max(unsigned char **tab, unsigned char profondeur, unsigned char actual_player);
 
 // checking values
 bool checking_value(unsigned char value, unsigned char minimum_value, unsigned char maximum_value) {
-	if (value < minimum_value || value > maximum_value) {
-		return false;
-	}
+	if (value < minimum_value || value > maximum_value) return false;
 	return true;
 }
 
 // creation of a array and memory allocation
-unsigned char **CreateArray(unsigned char lines_number, unsigned char columns_number){
-	unsigned char **tab = (unsigned char **)malloc(lines_number * sizeof(unsigned char *));
+unsigned char **create_array(){
+	unsigned char **tab = (unsigned char **)malloc(NB_ROWS * sizeof(unsigned char *));
 	if (tab == NULL) {
 		printf("Erreur d'allocation mémoire\n");
 		return NULL; 
 	}
-	for (unsigned char i = 0; i < lines_number; i++){
-		tab[i] = (unsigned char *)malloc(columns_number * sizeof(unsigned char));
+	for (unsigned char i = 0; i < NB_ROWS; i++){
+		tab[i] = (unsigned char *)malloc(NB_NB_COLUMNS * sizeof(unsigned char));
 		if (tab[i] == NULL){
 			printf("Erreur d'allocation mémoire\n");
 			return NULL;
@@ -35,50 +30,27 @@ unsigned char **CreateArray(unsigned char lines_number, unsigned char columns_nu
 }
 
 // liberation of the memory allocation 
-void freeArray(unsigned char **tab, unsigned char lines_number) {
-    for (unsigned char i = 0; i < lines_number; i++) {
-        free(tab[i]);
-    }
+void freeArray(unsigned char **tab) {
+    for (unsigned char i = 0; i < NB_ROWS; i++) free(tab[i]);
     free(tab);
 }
 
 // array filling
-void fillArray(unsigned char **tab, unsigned char lines_number, unsigned char columns_number){
-	for (unsigned char i = 0; i <lines_number; i++) {
-		for (unsigned char j = 0; j < columns_number; j++){
+void fillArray(unsigned char **tab){
+	for (unsigned char i = 0; i <NB_ROWS; i++) {
+		for (unsigned char j = 0; j < NB_NB_COLUMNS; j++){
 			tab [i][j] = 0; 
 		}
 	}
 }
 
-
-// return player poster
-char* Pion(unsigned char **tab, unsigned char lines_number, unsigned char columns_number) {
-	if (tab[lines_number][columns_number] == 1) {
-		return "X";
-	}
-	if (tab[lines_number][columns_number] == 2) {
-		return "O";
-	}
-	if (tab[lines_number][columns_number] == 0) {
-		return " "; 
-	}
-	else {
-		printf("Il y semble avoir une erreur dans l'assignation de la valeur dans le tableau");
-		return "P";
-	}
-}
-
-
-// reading of the array
-void reading(unsigned char **tab, unsigned char lines_number, unsigned char columns_number) {
-	char* value;
+void reading(unsigned char **tab){
+	char symbols[] = {' ','X','O'};
 	printf("-----------------------------\n");
-	for (unsigned char i = 0; i< lines_number; i++) {
+	for (unsigned char i = 0; i< NB_ROWS; i++) {
 		printf("|");
-		for (unsigned char j = 0; j < columns_number; j++) {
-			value = Pion(tab,i,j);
-			printf(" %s |",value);
+		for (unsigned char j = 0; j < NB_NB_COLUMNS; j++) {
+			printf(" %c |",symbols[tab[i][j]]);
 		}
 		printf("\n");
 	}
@@ -95,14 +67,14 @@ unsigned char player_choice() {
 }
 
 // the player plays
-unsigned char player_turn(unsigned char **tab, unsigned char lines_number, unsigned char columns_number, unsigned char player) {
+unsigned char player_turn(unsigned char **tab,unsigned char player) {
 	unsigned char columns;
 	bool ok = false;
 	bool check = false;
 	do {
 		do {
 			columns = player_choice();
-			check = checking_value(columns, 0, columns_number);
+			check = checking_value(columns, 0, NB_NB_COLUMNS);
 		} while (check == false); 
 		if (tab[0][columns] == 0) {
 			ok = true;
@@ -111,7 +83,7 @@ unsigned char player_turn(unsigned char **tab, unsigned char lines_number, unsig
 			printf("la colonne est pleine...\n");
 		}
 	} while (ok == false);
-	for (int row = lines_number -1; row >= 0 ; row--) {
+	for (int row = NB_ROWS -1; row >= 0 ; row--) {
 		if (tab[row][columns] == 0){
 			tab[row][columns] = player;
 			return **tab;
@@ -122,34 +94,34 @@ unsigned char player_turn(unsigned char **tab, unsigned char lines_number, unsig
 }
 
 // fonction pour vérifier si un joueur à gagner en horizontale, verticale et diagonale des deux sens \ ou / 
-bool win(unsigned char **tab, unsigned char lines_number, unsigned char columns_number, unsigned char player) {
+bool win(unsigned char **tab, unsigned char player) {
 	// honrizontale verirfiaction
-	for (unsigned char i = 0; i < lines_number; i++) {
-		for (unsigned char j = 0; j < (columns_number - 3); j++) {
+	for (unsigned char i = 0; i < NB_ROWS; i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 3); j++) {
 			if ((tab[i][j] == player) && (tab[i][(j+1)] == player) && (tab[i][(j+2)] == player) && (tab[i][(j+3)]) == player) {
 				return true;
 			}
 		}
 	}
 	// vertical verirication
-	for (unsigned char x = 0; x < columns_number; x++) {
-		for (unsigned char y = (lines_number - 1); y >= 3; y--) {
+	for (unsigned char x = 0; x < NB_NB_COLUMNS; x++) {
+		for (unsigned char y = (NB_ROWS - 1); y >= 3; y--) {
 			if ((tab[y][x] == player) && (tab[(y-1)][x] == player) && (tab[(y-2)][x] == player) && (tab[(y-3)][x]) == player) { 
 				return true;
 			}
 		}
 	}
 	// \ verification
-	for (unsigned char i = 0; i < (lines_number-3); i++) {
-		for (unsigned char j = 0; j < (columns_number - 3); j++) {
+	for (unsigned char i = 0; i < (NB_ROWS-3); i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 3); j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j+1)] == player) && (tab[i+2][(j+2)] == player) && (tab[i+3][(j+3)]) == player) {
 				return true;
 			}
 		}
 	}
 	// / verification
-	for (unsigned char i = 0; i < (lines_number - 3); i++) {
-		for (unsigned char j = 4; j < columns_number; j++) {
+	for (unsigned char i = 0; i < (NB_ROWS - 3); i++) {
+		for (unsigned char j = 4; j < NB_NB_COLUMNS; j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j-1)] == player) && (tab[i+2][(j-2)] == player) && (tab[i+3][(j-3)]) == player) {
 				return true;
 			}
@@ -159,18 +131,14 @@ bool win(unsigned char **tab, unsigned char lines_number, unsigned char columns_
 
 }
 
-bool tab_full(unsigned char **tab, unsigned char lines_number, unsigned char columns_number) {
-	for (unsigned char i = 0; i < columns_number; i++) {
-		if (tab[0][i] == 0) {
-			return false;
-		}
+bool tab_full(unsigned char **tab) {
+	for (unsigned char i = 0; i < NB_NB_COLUMNS; i++) {
+		if (tab[0][i] == 0) return false;
 	}
 	return true;
 }
 
 int count_score(unsigned char **tab, unsigned char player) {
-	unsigned char columns_number = 7;
-	unsigned char lines_number = 6;
 	unsigned char score[6][7] = {{3,4,5,7,5,4,3},{4,6,8,10,8,6,4}, {5,8,11,13,11,8,5},{5,8,11,13,11,8,5},{4,6,8,10,8,6,4},{3,4,5,7,5,4,3}};
 	int somme =0;
 	for (unsigned char i=0; i < 6; i++) {
@@ -182,32 +150,32 @@ int count_score(unsigned char **tab, unsigned char player) {
 	}
 	// verification for 4 
 	// honrizontale verirfiaction
-	for (unsigned char i = 0; i < lines_number; i++) {
-		for (unsigned char j = 0; j < (columns_number - 3); j++) {
+	for (unsigned char i = 0; i < NB_ROWS; i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 3); j++) {
 			if ((tab[i][j] == player) && (tab[i][(j+1)] == player) && (tab[i][(j+2)] == player) && (tab[i][(j+3)]) == player) {
 				somme += 10;
 			}
 		}
 	}
 	// vertical verirication
-	for (unsigned char x = 0; x < columns_number; x++) {
-		for (unsigned char y = (lines_number - 1); y >= 3; y--) {
+	for (unsigned char x = 0; x < NB_NB_COLUMNS; x++) {
+		for (unsigned char y = (NB_ROWS - 1); y >= 3; y--) {
 			if ((tab[y][x] == player) && (tab[(y-1)][x] == player) && (tab[(y-2)][x] == player) && (tab[(y-3)][x]) == player) { 
 				somme += 10;
 			}
 		}
 	}
 	// \ verification
-	for (unsigned char i = 0; i < (lines_number-3); i++) {
-		for (unsigned char j = 0; j < (columns_number - 3); j++) {
+	for (unsigned char i = 0; i < (NB_ROWS-3); i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 3); j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j+1)] == player) && (tab[i+2][(j+2)] == player) && (tab[i+3][j+3] == player)) {
 				somme += 10;
 			}
 		}
 	}
 	// / verification
-	for (unsigned char i = 0; i < (lines_number - 3); i++) {
-		for (unsigned char j = 4; j < columns_number; j++) {
+	for (unsigned char i = 0; i < (NB_ROWS - 3); i++) {
+		for (unsigned char j = 4; j < NB_NB_COLUMNS; j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j-1)] == player) && (tab[i+2][(j-2)] == player) && (tab[i+3][(j-3)]) == player) {
 				somme += 10;
 			}
@@ -215,32 +183,32 @@ int count_score(unsigned char **tab, unsigned char player) {
 	}
 	// veririfation for 3
 	// honrizontale verirfiaction
-	for (unsigned char i = 0; i < lines_number; i++) {
-		for (unsigned char j = 0; j < (columns_number - 2); j++) {
+	for (unsigned char i = 0; i < NB_ROWS; i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 2); j++) {
 			if ((tab[i][j] == player) && (tab[i][(j+1)] == player) && (tab[i][(j+2)] == player)) {
 				somme += 5;
 			}
 		}
 	}
 	// vertical verirication
-	for (unsigned char x = 0; x < columns_number; x++) {
-		for (unsigned char y = (lines_number - 1); y >= 2; y--) {
+	for (unsigned char x = 0; x < NB_NB_COLUMNS; x++) {
+		for (unsigned char y = (NB_ROWS - 1); y >= 2; y--) {
 			if ((tab[y][x] == player) && (tab[(y-1)][x] == player) && (tab[(y-2)][x] == player)) { 
 				somme += 5;
 			}
 		}
 	}
 	// \ verification
-	for (unsigned char i = 0; i < (lines_number-2); i++) {
-		for (unsigned char j = 0; j < (columns_number - 2); j++) {
+	for (unsigned char i = 0; i < (NB_ROWS-2); i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 2); j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j+1)] == player) && (tab[i+2][(j+2)] == player)) {
 				somme += 5;
 			}
 		}
 	}
 	// / verification
-	for (unsigned char i = 0; i < (lines_number - 2); i++) {
-		for (unsigned char j = 2; j < columns_number; j++) {
+	for (unsigned char i = 0; i < (NB_ROWS - 2); i++) {
+		for (unsigned char j = 2; j < NB_NB_COLUMNS; j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j-1)] == player) && (tab[i+2][(j-2)] == player)) {
 				somme += 5;
 			}
@@ -248,32 +216,32 @@ int count_score(unsigned char **tab, unsigned char player) {
 	}
 	// veririfation for 2
 	// honrizontale verirfiaction
-	for (unsigned char i = 0; i < lines_number; i++) {
-		for (unsigned char j = 0; j < (columns_number - 1); j++) {
+	for (unsigned char i = 0; i < NB_ROWS; i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 1); j++) {
 			if ((tab[i][j] == player) && (tab[i][(j+1)] == player)) {
 				somme += 3;
 			}
 		}
 	}
 	// vertical verirication
-	for (unsigned char x = 0; x < columns_number; x++) {
-		for (unsigned char y = (lines_number - 1); y >= 1; y--) {
+	for (unsigned char x = 0; x < NB_NB_COLUMNS; x++) {
+		for (unsigned char y = (NB_ROWS - 1); y >= 1; y--) {
 			if ((tab[y][x] == player) && (tab[(y-1)][x] == player)) { 
 				somme += 3;
 			}
 		}
 	}
 	// \ verification
-	for (unsigned char i = 0; i < (lines_number-1); i++) {
-		for (unsigned char j = 0; j < (columns_number - 1); j++) {
+	for (unsigned char i = 0; i < (NB_ROWS-1); i++) {
+		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 1); j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j+1)] == player)) {
 				somme += 3;
 			}
 		}
 	}
 	// / verification
-	for (unsigned char i = 0; i < (lines_number - 1); i++) {
-		for (unsigned char j = 1; j < columns_number; j++) {
+	for (unsigned char i = 0; i < (NB_ROWS - 1); i++) {
+		for (unsigned char j = 1; j < NB_NB_COLUMNS; j++) {
 			if ((tab[i][j] == player) && (tab[i+1][(j-1)] == player)) {
 				somme += 3;
 			}
@@ -282,9 +250,9 @@ int count_score(unsigned char **tab, unsigned char player) {
 	return somme; 
 }
 
-unsigned char get_first_row(unsigned char **tab, unsigned char columns) {
+unsigned char get_first_row(unsigned char **tab, unsigned short j) {
 	for (int i = 5; i >= 0; i--) {
-		if (tab[i][columns] == 0) {
+		if (tab[i][j] == 0) {
 			return i;
 		}
 	}
@@ -302,19 +270,19 @@ int min_max( unsigned char **tab, unsigned char profondeur, unsigned char actual
 	int best_score;
 	unsigned char IA = 2;
 	unsigned char player = 1;
-	if (win(tab, 6, 7, 2)) { // if IA win
+	if (win(tab, 2)) { // if IA win
     		return 10000;
 	}
-	if (win(tab, 6, 7, 1)) { // if the player win
+	if (win(tab,1)) { // if the player win
     		return -10000;
 	}
-	if ((profondeur == 0) ||(tab_full(tab, 6,7) == true)) {
+	if ((profondeur == 0) ||(tab_full(tab) == true)) {
 		return evaluate_board(tab);
 	}
 	if (actual_player == 2) {
 		best_score = -1000;
-		for (unsigned char i=0; i < 7; i++) {
-			row = get_first_row(tab, i);
+		for (unsigned char i=0; i < NB_NB_COLUMNS; i++) {
+			row = get_first_row(tab,i);
 			if (row != 55) {
 				tab[row][i] = IA;
 				int score = min_max(tab, (profondeur - 1), player);
@@ -328,8 +296,8 @@ int min_max( unsigned char **tab, unsigned char profondeur, unsigned char actual
 	}
 	if (actual_player == player) {
 		int worse_score = 1000;
-		for (unsigned char i=0; i < 7; i++) {
-			row = get_first_row(tab, i);
+		for (unsigned char i=0; i < NB_NB_COLUMNS; i++) {
+			row = get_first_row(tab,i);
 			if (row != 55) {
 				tab[row][i] = player;
 				int score = min_max(tab, (profondeur - 1), IA);
@@ -350,7 +318,7 @@ unsigned char best_shot(unsigned char **tab,unsigned char profondeur) {
 	int score;
 	unsigned char row;
 	for (unsigned char i=0; i < 7; i++) {
-		row = get_first_row(tab, i);
+		row = get_first_row(tab,i);
 		if (row != 55) {
 			tab[row][i] = 2;
 			score = min_max(tab, (profondeur -1), 1);
@@ -366,15 +334,10 @@ unsigned char best_shot(unsigned char **tab,unsigned char profondeur) {
 
 
 int main(void) {
-    const unsigned char LINES = 6;
-    const unsigned char COLUMNS = 7;
-    unsigned char **board = CreateArray(LINES, COLUMNS);
-    if (board == NULL) {
-        return 1;
-    }
-    fillArray(board, LINES, COLUMNS);
-    
-    reading(board, LINES, COLUMNS);
+    unsigned char **board = create_array();
+    if (board == NULL) return 1;
+    fillArray(board); 
+    reading(board);
     
     int game_over = 0;
     int turn = 1; // 1 pour le joueur humain (X), 2 pour l'IA (O)
@@ -383,9 +346,9 @@ int main(void) {
         if (turn == 1) {
             // Tour du joueur humain
             printf("Tour du joueur (X) :\n");
-            player_turn(board, LINES, COLUMNS, 1);
-            reading(board, LINES, COLUMNS);
-            if (win(board, LINES, COLUMNS, 1)) {
+            player_turn(board,1);
+            reading(board);
+            if (win(board, 1)) {
                 printf("Le joueur gagne !\n");
                 game_over = 1;
                 break;
@@ -405,15 +368,15 @@ int main(void) {
             } else {
                 board[row][ai_col] = 2;
                 printf("L'IA joue en colonne %d.\n", ai_col + 1);
-                reading(board, LINES, COLUMNS);
-                if (win(board, LINES, COLUMNS, 2)) {
+                reading(board);
+                if (win(board,2)) {
                     printf("L'IA gagne !\n");
                     game_over = 1;
                     break;
                 }
             }
         }
-        if (tab_full(board, LINES, COLUMNS)) {
+        if (tab_full(board)) {
             printf("Match nul !\n");
             break;
         }
@@ -421,7 +384,7 @@ int main(void) {
         turn = (turn == 1) ? 2 : 1;
     }
     
-    freeArray(board, LINES);
+    freeArray(board);
     return 0;
 }
 
