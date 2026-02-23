@@ -62,8 +62,7 @@ unsigned char player_choice() {
 	unsigned char choice;
 	printf("Veuillez choisir le numéro d'une colonne\n"); 
 	scanf("%hhu", &choice);
-	choice = choice - 1; // on enlève 1 pour correcpondre au tableau
-	return choice; // correspond à la colonne du tableau 
+	return choice-1;
 }
 
 // the player plays
