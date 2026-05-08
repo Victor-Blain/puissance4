@@ -4,5 +4,5 @@ My first project in C!
 
 ## Description 
 
-Play against IA or watch an AI vs AI game.
+Play against IA. 
 The AI is based on the Minimax algorithm. 
