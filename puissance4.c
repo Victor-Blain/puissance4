@@ -119,9 +119,9 @@ bool win(unsigned char **tab, unsigned char player) {
 		}
 	}
 	// / verification
-	for (unsigned char i = 0; i < (NB_ROWS - 3); i++) {
-		for (unsigned char j = 4; j < NB_NB_COLUMNS; j++) {
-			if ((tab[i][j] == player) && (tab[i+1][(j-1)] == player) && (tab[i+2][(j-2)] == player) && (tab[i+3][(j-3)]) == player) {
+	for (unsigned char i = 3; i < NB_ROWS; i++) {
+		for (unsigned char j = 0; j < 3; j++) { //NB_NB_COLUMNS-4
+			if ((tab[i][j] == player) && (tab[i-1][(j+1)] == player) && (tab[i-2][(j+2)] == player) && (tab[i-3][(j+3)]) == player) {
 				return true;
 			}
 		}
@@ -148,6 +148,10 @@ int count_score(unsigned char **tab, unsigned char player) {
 		}
 	}
 	// verification for 4 
+
+	if (win(tab,player)) return 100;
+
+	/*
 	// honrizontale verirfiaction
 	for (unsigned char i = 0; i < NB_ROWS; i++) {
 		for (unsigned char j = 0; j < (NB_NB_COLUMNS - 3); j++) {
@@ -180,6 +184,7 @@ int count_score(unsigned char **tab, unsigned char player) {
 			}
 		}
 	}
+	*/
 	// veririfation for 3
 	// honrizontale verirfiaction
 	for (unsigned char i = 0; i < NB_ROWS; i++) {
@@ -331,13 +336,11 @@ unsigned char best_shot(unsigned char **tab,unsigned char profondeur) {
 	return best_columns;
 }
 
-
-int main(void) {
-    unsigned char **board = create_array();
+void play(){
+	unsigned char **board = create_array();
     if (board == NULL) return 1;
     fillArray(board); 
     reading(board);
-    
     int game_over = 0;
     int turn = 1; // 1 pour le joueur humain (X), 2 pour l'IA (O)
     
@@ -382,8 +385,10 @@ int main(void) {
         // Changement de tour
         turn = (turn == 1) ? 2 : 1;
     }
-    
     freeArray(board);
-    return 0;
 }
 
+int main(void) {
+    play();
+    return 0;
+}
